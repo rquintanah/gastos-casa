@@ -1,0 +1,80 @@
+# Autopilot: cuando etiquetas un issue con "autopilot", Claude Code lo implementa en GitHub Actions
+# y abre un Pull Request. Tú solo revisas y apruebas el merge.
+# Equivale al "Parkboard + Autopilot" del video, usando GitHub Issues como tablero.
+#
+# Requisitos:
+#   - Secret del repo: ANTHROPIC_API_KEY  (o CLAUDE_CODE_OAUTH_TOKEN; ver docs de la acción)
+#   - Instalar la GitHub App de Claude en el repo (en Claude Code: /install-github-app)
+#   - Verifica la versión vigente de anthropics/claude-code-action antes de usar.
+# Seguridad: solo quien tiene permisos de escritura puede poner etiquetas, así que solo tú disparas el robot.
+# Costo: cada ejecución consume minutos de Actions (cuota gratuita en repos privados) y tokens de la API de Anthropic.
+# Por eso NO corre por horario: solo cuando tú etiquetas un issue o lo lanzas a mano. OPCIONAL: actívalo cuando el equipo ya funcione bien en local.
+
+name: autopilot
+
+on:
+  issues:
+    types: [labeled]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  id-token: write
+
+concurrency:
+  group: autopilot
+  cancel-in-progress: false
+
+jobs:
+  implementar:
+    if: github.event_name != 'issues' || github.event.label.name == 'autopilot'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+
+      - name: Elegir issue
+        id: issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ github.event_name }}" = "issues" ]; then
+            echo "numero=${{ github.event.issue.number }}" >> "$GITHUB_OUTPUT"
+          else
+            n=$(gh issue list --label autopilot --state open --json number --jq 'sort_by(.number) | .[0].number // empty')
+            echo "numero=$n" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Claude Code implementa el issue
+        if: steps.issue.outputs.numero != ''
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Implementa el issue #${{ steps.issue.outputs.numero }} de este repositorio
+            (léelo con: gh issue view ${{ steps.issue.outputs.numero }} --comments).
+            Sigue CLAUDE.md y la skill nueva-feature, con estas diferencias por correr sin humano:
+            - Si el plan requiere aprobación humana, NO implementes: comenta el plan en el issue y termina.
+            - Omite la revisión con Codex (se hará en el PR).
+            - Abre un Pull Request que incluya "Closes #${{ steps.issue.outputs.numero }}". Nunca hagas merge.
+          claude_args: "--max-turns 60"
+
+      - name: Quitar etiqueta para no repetir
+        if: steps.issue.outputs.numero != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh issue edit ${{ steps.issue.outputs.numero }} --remove-label autopilot --add-label autopilot-hecho

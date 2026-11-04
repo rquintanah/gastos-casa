@@ -1,0 +1,29 @@
+# --- Añadir al .gitignore de cada repo ---
+.revision/
+.claude/settings.local.json
+.deploy.env
+# Secretos: nunca a git (la plantilla .env.example sí se versiona)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.jks
+
+# Backend (Maven)
+backend/target/
+
+# Frontend (Angular)
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/coverage/
+
+# IDE y sistema
+.idea/
+*.iml
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+*.log
