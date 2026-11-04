@@ -32,8 +32,10 @@ jobs:
             backend:
               - 'backend/**'
               - 'pom.xml'
+              - '.github/workflows/ci.yml'   # un cambio en el CI se prueba con el CI completo
             frontend:
               - 'frontend/**'
+              - '.github/workflows/ci.yml'
 
   backend:
     needs: cambios
