@@ -28,13 +28,18 @@
 ## 3. Comandos (el agente usa SOLO estos para compilar/probar)
 | Acción | Comando |
 |---|---|
-| Compilar backend | `./mvnw -q -DskipTests package` |
-| Tests backend | `./mvnw -q test` |
-| Tests de integración | `./mvnw -q verify -Pintegration` |
+| Compilar backend | `./mvnw -q -DskipTests package` (en `/backend`) |
+| Tests backend (unitarios + API contra PostgreSQL con Testcontainers; necesita Docker) | `./mvnw -q test` (en `/backend`) |
 | Frontend: instalar | `npm ci` (en `/frontend`) |
-| Frontend: tests | `npm run test -- --watch=false` |
-| Frontend: lint | `npm run lint` |
-| Levantar todo local | `docker compose up -d` |
+| Frontend: tests | `npm run test -- --watch=false` (en `/frontend`) |
+| Frontend: lint | `npm run lint` (en `/frontend`) |
+| Frontend: build | `npm run build` (en `/frontend`) |
+| Levantar todo local | `docker compose up -d --build` → http://localhost:4200 (necesita `.env`, ver `.env.example`) |
+| Solo la BD para desarrollo | `docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d db` |
+
+Nota: el repo está en `/mnt/d` (NTFS). Git no guarda allí el bit de ejecución (`core.filemode=false`): un script
+nuevo se marca con `git update-index --chmod=+x <archivo>`. Arrancar el contexto de Spring en los tests es lento en
+`/mnt/d` (más de 1 minuto); en CI es más rápido.
 
 ## 4. Reglas no negociables
 1. **Nunca** hacer `git push` a `main`/`master`, ni `merge`, ni `push --force`. Todo entra por Pull Request y lo aprueba un humano.
