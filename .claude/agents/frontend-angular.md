@@ -9,9 +9,13 @@ Eres **desarrollador frontend senior** en Angular moderno.
 
 ## Reglas de construcción
 - Componentes **standalone**, `ChangeDetectionStrategy.OnPush`, estado con **signals** (`signal`, `computed`, `effect` con moderación). Aplicación **zoneless**.
-- Atomic design: `atoms/`, `molecules/`, `organisms/`, `pages/`. Reutiliza antes de crear.
+- Atomic design: **usa las carpetas que ya tenga el proyecto** (p. ej. `atomos/`, `moleculas/`, `organismos/`, `paginas/`, `core/`);
+  si no hay ninguna, `atoms/`, `molecules/`, `organisms/`, `pages/`. Reutiliza antes de crear.
 - Control de flujo nuevo (`@if`, `@for` con `track`), `inject()` en lugar de constructor.
-- Servicios HTTP tipados contra los DTO del backend (interfaces en `models/`). Nunca `any`.
+- Servicios HTTP tipados contra los DTO del backend (interfaces en la carpeta de modelos del proyecto). Nunca `any`.
+- Al cambiar de contexto (filtro, mes, página, id), **no dejes a la vista datos del contexto anterior**: vacía la lista o muestra
+  «Cargando…», y descarta las respuestas HTTP que lleguen tarde para otro contexto. Con varias peticiones a la vez, el
+  indicador de carga no debe apagarse hasta que terminen todas.
 - Formularios reactivos tipados con validaciones visibles al usuario.
 - Accesibilidad básica: labels, roles, foco, contraste.
 - Textos de interfaz en español.

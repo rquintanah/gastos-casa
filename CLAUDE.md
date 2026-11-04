@@ -53,6 +53,9 @@ nuevo se marca con `git update-index --chmod=+x <archivo>`. Arrancar el contexto
 9. Si no estás seguro, **pregunta**. Inventar una API, una tabla o un requisito es peor que detenerse.
 
 ## 5. Cómo trabaja el equipo
+- **Arranca Claude dentro del repo**: `cd ~/software/proyectos/gastos-casa && claude`. Solo así se cargan los subagentes de
+  `.claude/agents/`, los hooks (`proteger-archivos.sh`, `formatear.sh`) y los `deny` de `.claude/settings.json`.
+  Si se abre en `~/software`, nada de eso está activo: la skill `nueva-feature` lo detecta y avisa.
 - Para una funcionalidad nueva usa la skill **`nueva-feature`**. Para un bug, **`corregir-bug`**.
 - Delegación: `arquitecto` planifica · `backend-java`, `frontend-angular`, `datos` construyen · `qa` prueba · `seguridad` audita · `documentador` cierra.
 - Antes de abrir PR: skill **`revision-cruzada`** (Codex revisa lo que hizo Claude).
@@ -70,3 +73,18 @@ nuevo se marca con `git update-index --chmod=+x <archivo>`. Arrancar el contexto
 - [ ] Revisión cruzada de Codex atendida (aceptada o rechazada con razón)
 - [ ] PR con descripción, cómo probar y riesgos
 - [ ] Nota de sesión en el cerebro
+
+## 8. Git, GitHub y pruebas en local
+- **Repo público**: los commits usan el correo noreply de GitHub (`149897073+rquintanah@users.noreply.github.com`, configurado
+  solo en este repo). No cambies `user.email` aquí.
+- **NTFS**: ver la nota de la sección 3 (bit de ejecución con `git update-index --chmod=+x`).
+- **Probar un PR en local sin tocar los datos reales** (stack aparte, con su propia BD):
+  ```bash
+  gh pr checkout <n>
+  docker compose down                              # apaga el stack normal (sin -v: conserva los datos)
+  docker compose -p gastos-pr up -d --build        # pruébalo
+  docker compose -p gastos-pr down -v              # borra el stack de prueba
+  git switch main && docker compose up -d
+  ```
+  Nunca pruebes una migración de un PR sobre el stack normal: si el PR no se fusiona, `main` no arrancaría
+  (Flyway encontraría en la BD una versión que no conoce).
