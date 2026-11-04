@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: gastos-casa
+  # En local lee las credenciales del .env de la raíz del repo (fuera de git).
+  # En Docker no existe ese archivo y llegan como variables de entorno.
+  config:
+    import: optional:file:../.env[.properties]
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/${POSTGRES_DB:gastos}}
+    username: ${POSTGRES_USER:}
+    password: ${POSTGRES_PASSWORD:}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate   # el esquema lo gestiona Flyway; Hibernate solo valida
+  mvc:
+    problemdetails:
+      enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health

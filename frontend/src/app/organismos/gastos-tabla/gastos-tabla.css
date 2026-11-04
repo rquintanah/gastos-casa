@@ -1,0 +1,50 @@
+.desplazable {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--borde);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.num {
+  text-align: right;
+}
+
+.nota {
+  max-width: 18rem;
+  overflow-wrap: anywhere;
+  color: var(--texto-suave);
+}
+
+.acciones {
+  display: flex;
+  gap: 0.25rem;
+  justify-content: flex-end;
+}
+
+tfoot th,
+tfoot td {
+  font-weight: 700;
+  border-bottom: none;
+}
+
+.vacio {
+  color: var(--texto-suave);
+}
+
+.oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}

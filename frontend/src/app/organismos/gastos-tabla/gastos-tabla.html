@@ -1,0 +1,38 @@
+@if (gastos().length === 0) {
+  <p class="vacio">Todavía no hay gastos. Añade el primero con el formulario.</p>
+} @else {
+  <div class="desplazable">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Fecha</th>
+          <th scope="col">Categoría</th>
+          <th scope="col">Nota</th>
+          <th scope="col" class="num">Importe</th>
+          <th scope="col"><span class="oculto">Acciones</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (gasto of gastos(); track gasto.id) {
+          <tr>
+            <td>{{ gasto.fecha | date: 'dd/MM/yyyy' }}</td>
+            <td>{{ gasto.categoria.nombre }}</td>
+            <td class="nota">{{ gasto.nota }}</td>
+            <td class="num"><app-importe-pen [importe]="gasto.importe" /></td>
+            <td class="acciones">
+              <button type="button" class="secundario" (click)="editar.emit(gasto)">Editar</button>
+              <button type="button" class="peligro" (click)="borrar.emit(gasto)">Borrar</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+      <tfoot>
+        <tr>
+          <th scope="row" colspan="3">Total</th>
+          <td class="num"><app-importe-pen [importe]="total()" /></td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+}
