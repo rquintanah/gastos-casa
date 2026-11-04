@@ -4,6 +4,8 @@ import com.rquintanah.gastoscasa.categoria.Categoria;
 import com.rquintanah.gastoscasa.categoria.CategoriaRepository;
 import com.rquintanah.gastoscasa.error.DatoInvalidoException;
 import com.rquintanah.gastoscasa.error.RecursoNoEncontradoException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,14 +32,14 @@ public class GastoService {
 
     @Transactional
     public GastoDto crear(GastoRequest datos) {
-        Gasto gasto = new Gasto(datos.fecha(), datos.importe(), categoria(datos.categoriaId()), notaLimpia(datos.nota()));
+        Gasto gasto = new Gasto(datos.fecha(), importe(datos.importe()), categoria(datos.categoriaId()), notaLimpia(datos.nota()));
         return GastoDto.de(gastos.save(gasto));
     }
 
     @Transactional
     public GastoDto actualizar(Long id, GastoRequest datos) {
         Gasto gasto = buscar(id);
-        gasto.actualizar(datos.fecha(), datos.importe(), categoria(datos.categoriaId()), notaLimpia(datos.nota()));
+        gasto.actualizar(datos.fecha(), importe(datos.importe()), categoria(datos.categoriaId()), notaLimpia(datos.nota()));
         return GastoDto.de(gasto);
     }
 
@@ -54,6 +56,11 @@ public class GastoService {
     private Categoria categoria(Short id) {
         return categorias.findById(id)
                 .orElseThrow(() -> new DatoInvalidoException("categoriaId", "La categoría " + id + " no existe"));
+    }
+
+    /** Siempre 2 decimales, como NUMERIC(12,2): 45.5 → 45.50. @Digits ya garantiza que no hay más de 2. */
+    private static BigDecimal importe(BigDecimal importe) {
+        return importe.setScale(2, RoundingMode.UNNECESSARY);
     }
 
     /** Nota vacía o solo espacios se guarda como null. */

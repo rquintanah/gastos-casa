@@ -47,6 +47,7 @@ class GastoApiTest {
 
         assertThat(resultado).hasStatus(HttpStatus.CREATED).headers().containsHeader("Location");
         assertThat(resultado).bodyJson().extractingPath("$.importe").isEqualTo(45.50);
+        assertThat(resultado).bodyJson().asString().contains("\"importe\":45.50");
         assertThat(resultado).bodyJson().extractingPath("$.fecha").isEqualTo(HOY.toString());
         assertThat(resultado).bodyJson().extractingPath("$.categoria.nombre").isEqualTo("Comida");
         assertThat(resultado).bodyJson().extractingPath("$.nota").isEqualTo("Mercado");
