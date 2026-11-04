@@ -1,0 +1,13 @@
+<div class="selector">
+  <button type="button" class="secundario" aria-label="Mes anterior" (click)="mover(-1)">‹</button>
+  <span class="etiqueta" aria-live="polite">{{ etiquetaMes(mes()) }}</span>
+  <button
+    type="button"
+    class="secundario"
+    aria-label="Mes siguiente"
+    [disabled]="mes() >= maximo()"
+    (click)="mover(1)"
+  >
+    ›
+  </button>
+</div>

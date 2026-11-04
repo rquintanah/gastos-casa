@@ -1,5 +1,5 @@
 @if (gastos().length === 0) {
-  <p class="vacio">Todavía no hay gastos. Añade el primero con el formulario.</p>
+  <p class="vacio">{{ mensajeVacio() }}</p>
 } @else {
   <div class="desplazable">
     <table>

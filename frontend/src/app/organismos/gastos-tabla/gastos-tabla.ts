@@ -13,6 +13,7 @@ import { Gasto } from '../../core/modelos';
 export class GastosTabla {
   readonly gastos = input.required<Gasto[]>();
   readonly total = input.required<number>();
+  readonly mensajeVacio = input('Todavía no hay gastos.');
 
   readonly editar = output<Gasto>();
   readonly borrar = output<Gasto>();

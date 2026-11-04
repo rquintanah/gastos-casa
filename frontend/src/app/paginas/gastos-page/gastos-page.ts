@@ -1,27 +1,50 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal, viewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  effect,
+  inject,
+  signal,
+  untracked,
+  viewChild,
+} from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { ImportePen } from '../../atomos/importe-pen/importe-pen';
 import { GastosStore } from '../../core/gastos-store';
+import { MesSeleccionado } from '../../core/mes-seleccionado';
 import { Gasto, GastoRequest } from '../../core/modelos';
 import { GastoForm } from '../../moleculas/gasto-form/gasto-form';
+import { SelectorMes } from '../../moleculas/selector-mes/selector-mes';
 import { GastosTabla } from '../../organismos/gastos-tabla/gastos-tabla';
 
 @Component({
   selector: 'app-gastos-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, GastoForm, GastosTabla, ImportePen],
+  imports: [DatePipe, GastoForm, GastosTabla, ImportePen, SelectorMes],
   templateUrl: './gastos-page.html',
   styleUrl: './gastos-page.css',
 })
 export class GastosPage implements OnInit {
   protected readonly store = inject(GastosStore);
+  protected readonly periodo = inject(MesSeleccionado);
   private readonly formulario = viewChild.required(GastoForm);
 
   protected readonly editando = signal<Gasto | null>(null);
   protected readonly porBorrar = signal<Gasto | null>(null);
 
+  constructor() {
+    // Carga el mes actual al iniciar y recarga cada vez que cambia el mes.
+    effect(() => {
+      this.periodo.mes();
+      untracked(() => {
+        this.porBorrar.set(null);
+        void this.store.cargarGastos();
+      });
+    });
+  }
+
   ngOnInit(): void {
-    void this.store.cargar();
+    void this.store.cargarCategorias();
   }
 
   protected async guardar(datos: GastoRequest): Promise<void> {

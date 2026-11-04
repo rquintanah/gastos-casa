@@ -9,7 +9,10 @@
 </section>
 
 <section class="panel">
-  <h2>Gastos</h2>
+  <header class="cabecera">
+    <h2>Gastos</h2>
+    <app-selector-mes [mes]="periodo.mes()" [maximo]="periodo.maximo" (cambiar)="periodo.ir($event)" />
+  </header>
 
   @if (store.error(); as error) {
     <p class="aviso error" role="alert">{{ error }}</p>
@@ -28,10 +31,11 @@
 
   @if (store.cargando() && store.gastos().length === 0) {
     <p>Cargando…</p>
-  } @else {
+  } @else if (!(store.error() && store.gastos().length === 0)) {
     <app-gastos-tabla
       [gastos]="store.gastos()"
       [total]="store.total()"
+      [mensajeVacio]="'No hay gastos en ' + periodo.etiqueta()"
       (editar)="editando.set($event)"
       (borrar)="porBorrar.set($event)"
     />

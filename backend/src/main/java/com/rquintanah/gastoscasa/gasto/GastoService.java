@@ -6,6 +6,7 @@ import com.rquintanah.gastoscasa.error.DatoInvalidoException;
 import com.rquintanah.gastoscasa.error.RecursoNoEncontradoException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.YearMonth;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,8 +23,16 @@ public class GastoService {
         this.categorias = categorias;
     }
 
-    public List<GastoDto> listar() {
-        return gastos.findAllByOrderByFechaDescIdDesc().stream().map(GastoDto::de).toList();
+    /** Todos los gastos si mes es null; si no, solo los de ese mes. */
+    public List<GastoDto> listar(YearMonth mes) {
+        List<Gasto> resultado;
+        if (mes == null) {
+            resultado = gastos.findAllByOrderByFechaDescIdDesc();
+        } else {
+            RangoMes rango = RangoMes.de(mes);
+            resultado = gastos.buscarEntreFechas(rango.desde(), rango.hasta());
+        }
+        return resultado.stream().map(GastoDto::de).toList();
     }
 
     public GastoDto obtener(Long id) {

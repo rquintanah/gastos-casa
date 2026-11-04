@@ -1,0 +1,11 @@
+.selector {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.etiqueta {
+  min-width: 9rem;
+  text-align: center;
+  font-weight: 600;
+}

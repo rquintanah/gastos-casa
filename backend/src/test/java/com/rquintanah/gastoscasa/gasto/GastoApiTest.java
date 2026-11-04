@@ -6,9 +6,11 @@ import com.rquintanah.gastoscasa.PostgresTestcontainers;
 import com.jayway.jsonpath.JsonPath;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -70,6 +72,82 @@ class GastoApiTest {
                 .extractingPath("$[*].fecha")
                 .asArray()
                 .containsExactly(HOY.toString(), HOY.minusDays(1).toString(), HOY.minusDays(5).toString());
+    }
+
+    @Test
+    void filtraPorMesRespetandoLimitesYOrden() {
+        crear(json(LocalDate.of(2026, 1, 31), "1", 1, null));
+        crear(json(LocalDate.of(2026, 2, 1), "2", 1, null));
+        crear(json(LocalDate.of(2026, 2, 15), "3", 1, null));
+        crear(json(LocalDate.of(2026, 2, 28), "4", 1, null));
+        crear(json(LocalDate.of(2026, 3, 1), "5", 1, null));
+
+        assertThat(mvc.get().uri("/api/gastos").param("mes", "2026-02"))
+                .hasStatusOk()
+                .bodyJson()
+                .extractingPath("$[*].fecha")
+                .asArray()
+                .containsExactly("2026-02-28", "2026-02-15", "2026-02-01");
+    }
+
+    @Test
+    void febreroBisiestoIncluyeElDia29SoloEnSuMes() {
+        crear(json(LocalDate.of(2024, 2, 29), "1", 1, null));
+
+        assertThat(mvc.get().uri("/api/gastos").param("mes", "2024-02"))
+                .bodyJson().extractingPath("$[*].fecha").asArray().containsExactly("2024-02-29");
+        assertThat(mvc.get().uri("/api/gastos").param("mes", "2024-03"))
+                .bodyJson().extractingPath("$").asArray().isEmpty();
+    }
+
+    @Test
+    void mismoDiaSeOrdenaPorIdDescendente() {
+        crear(json(LocalDate.of(2026, 2, 10), "1", 1, null));
+        crear(json(LocalDate.of(2026, 2, 10), "2", 1, null));
+
+        assertThat(mvc.get().uri("/api/gastos").param("mes", "2026-02"))
+                .bodyJson().extractingPath("$[*].importe").asArray().containsExactly(2.00, 1.00);
+    }
+
+    @Test
+    void mesSinGastosOFuturoDevuelveListaVacia() {
+        crear(json(LocalDate.of(2026, 2, 10), "1", 1, null));
+
+        assertThat(mvc.get().uri("/api/gastos").param("mes", "2025-06"))
+                .hasStatusOk().bodyJson().extractingPath("$").asArray().isEmpty();
+        assertThat(mvc.get().uri("/api/gastos").param("mes", YearMonth.now().plusMonths(1).toString()))
+                .hasStatusOk().bodyJson().extractingPath("$").asArray().isEmpty();
+    }
+
+    @Test
+    void mesVacioEquivaleASinFiltro() {
+        crear(json(LocalDate.of(2026, 1, 10), "1", 1, null));
+        crear(json(LocalDate.of(2026, 3, 10), "2", 1, null));
+
+        assertThat(mvc.get().uri("/api/gastos").param("mes", ""))
+                .hasStatusOk().bodyJson().extractingPath("$[*].fecha").asArray()
+                .containsExactly("2026-03-10", "2026-01-10");
+    }
+
+    @ParameterizedTest(name = "mes={0}")
+    @ValueSource(strings = {"2026-13", "2026-00", "2026-1", "202611", "nov-2026", "2026-11-01", "abc", "-0001-01", "10000-01", "+10000-01", "+999999999-12"})
+    void rechazaMesInvalido(String mes) {
+        assertThat(mvc.get().uri("/api/gastos").param("mes", mes))
+                .hasStatus(HttpStatus.BAD_REQUEST)
+                .bodyJson()
+                .satisfies(json -> {
+                    assertThat(json).extractingPath("$.title").isEqualTo("Datos inválidos");
+                    assertThat(json).extractingPath("$.errores.mes").isNotNull();
+                });
+    }
+
+    @Test
+    void idNoNumericoDevuelve400ConErrorEnId() {
+        assertThat(mvc.get().uri("/api/gastos/abc"))
+                .hasStatus(HttpStatus.BAD_REQUEST)
+                .bodyJson()
+                .extractingPath("$.errores.id")
+                .isEqualTo("Valor no válido");
     }
 
     @ParameterizedTest(name = "{0}")
