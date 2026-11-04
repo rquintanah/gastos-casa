@@ -1,0 +1,47 @@
+<form [formGroup]="form" (ngSubmit)="enviar()" novalidate>
+  <h2>{{ gasto() ? 'Editar gasto' : 'Nuevo gasto' }}</h2>
+
+  <label>
+    Fecha
+    <input type="date" formControlName="fecha" [max]="hoy" />
+  </label>
+  @if (muestraError('fecha')) {
+    <small class="error">Indica una fecha que no sea futura.</small>
+  }
+
+  <label>
+    Importe (S/)
+    <input type="number" formControlName="importe" min="0.01" step="0.01" inputmode="decimal" placeholder="0.00" />
+  </label>
+  @if (muestraError('importe')) {
+    <small class="error">El importe debe ser mayor que 0 y con 2 decimales como máximo.</small>
+  }
+
+  <label>
+    Categoría
+    <select formControlName="categoriaId">
+      <option [ngValue]="0" disabled>Elige una categoría</option>
+      @for (categoria of categorias(); track categoria.id) {
+        <option [ngValue]="categoria.id">{{ categoria.nombre }}</option>
+      }
+    </select>
+  </label>
+  @if (muestraError('categoriaId')) {
+    <small class="error">Elige una categoría.</small>
+  }
+
+  <label>
+    Nota (opcional)
+    <textarea formControlName="nota" rows="2" maxlength="500"></textarea>
+  </label>
+  @if (muestraError('nota')) {
+    <small class="error">Máximo 500 caracteres.</small>
+  }
+
+  <div class="acciones">
+    <button type="submit" [disabled]="ocupado()">{{ gasto() ? 'Guardar cambios' : 'Añadir gasto' }}</button>
+    @if (gasto()) {
+      <button type="button" class="secundario" (click)="cancelar.emit()">Cancelar</button>
+    }
+  </div>
+</form>

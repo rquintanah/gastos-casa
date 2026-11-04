@@ -1,0 +1,65 @@
+/* Estilos globales: paleta (claro/oscuro) y botones. */
+:root {
+  color-scheme: light dark;
+  --fondo: #f6f7f9;
+  --superficie: #ffffff;
+  --texto: #1d2330;
+  --texto-suave: #5b6475;
+  --borde: #d9dde5;
+  --primario: #1f6feb;
+  --primario-texto: #ffffff;
+  --peligro: #c62828;
+  --error: #b42318;
+  --error-fondo: #fdecea;
+  --aviso-fondo: #fff4d6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fondo: #12151b;
+    --superficie: #1a1f27;
+    --texto: #e7eaf0;
+    --texto-suave: #a0a8b8;
+    --borde: #2e3542;
+    --primario: #4c8dff;
+    --primario-texto: #0b1020;
+    --peligro: #ff6b6b;
+    --error: #ff8a80;
+    --error-fondo: #3a1c1c;
+    --aviso-fondo: #3a3220;
+  }
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background: var(--fondo);
+  color: var(--texto);
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  padding: 0.45rem 0.8rem;
+  border-radius: 6px;
+  border: 1px solid var(--primario);
+  background: var(--primario);
+  color: var(--primario-texto);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+button.secundario {
+  background: transparent;
+  color: var(--texto);
+  border-color: var(--borde);
+}
+
+button.peligro {
+  background: transparent;
+  color: var(--peligro);
+  border-color: var(--peligro);
+}

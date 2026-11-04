@@ -1,0 +1,39 @@
+<section class="panel formulario">
+  <app-gasto-form
+    [categorias]="store.categorias()"
+    [gasto]="editando()"
+    [ocupado]="store.cargando()"
+    (guardar)="guardar($event)"
+    (cancelar)="editando.set(null)"
+  />
+</section>
+
+<section class="panel">
+  <h2>Gastos</h2>
+
+  @if (store.error(); as error) {
+    <p class="aviso error" role="alert">{{ error }}</p>
+  }
+
+  @if (porBorrar(); as gasto) {
+    <div class="aviso confirmar" role="alertdialog" aria-label="Confirmar borrado">
+      <span>
+        ¿Borrar el gasto del {{ gasto.fecha | date: 'dd/MM/yyyy' }} de
+        <app-importe-pen [importe]="gasto.importe" /> ({{ gasto.categoria.nombre }})?
+      </span>
+      <button type="button" class="peligro" (click)="confirmarBorrado()">Sí, borrar</button>
+      <button type="button" class="secundario" (click)="porBorrar.set(null)">No</button>
+    </div>
+  }
+
+  @if (store.cargando() && store.gastos().length === 0) {
+    <p>Cargando…</p>
+  } @else {
+    <app-gastos-tabla
+      [gastos]="store.gastos()"
+      [total]="store.total()"
+      (editar)="editando.set($event)"
+      (borrar)="porBorrar.set($event)"
+    />
+  }
+</section>

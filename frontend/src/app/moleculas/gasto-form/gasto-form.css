@@ -1,0 +1,36 @@
+form {
+  display: grid;
+  gap: 0.5rem;
+}
+
+h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+}
+
+label {
+  display: grid;
+  gap: 0.25rem;
+  font-weight: 600;
+}
+
+input,
+select,
+textarea {
+  font: inherit;
+  padding: 0.45rem 0.5rem;
+  border: 1px solid var(--borde);
+  border-radius: 6px;
+  background: var(--fondo);
+  color: var(--texto);
+}
+
+.error {
+  color: var(--error);
+}
+
+.acciones {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
