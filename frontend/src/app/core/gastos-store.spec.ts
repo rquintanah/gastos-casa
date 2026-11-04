@@ -73,6 +73,30 @@ describe('GastosStore', () => {
     expect(store.cargando()).toBe(false);
   });
 
+  it('al cambiar de mes vacía la lista antes de que llegue la respuesta', async () => {
+    const carga = store.cargarGastos();
+    gastosDelMes('2026-11').flush(GASTOS);
+    await carga;
+
+    periodo.ir('2026-10');
+    const otra = store.cargarGastos();
+    expect(store.gastos()).toEqual([]);
+    gastosDelMes('2026-10').flush([GASTOS[1]]);
+    await otra;
+    expect(store.gastos()).toEqual([GASTOS[1]]);
+  });
+
+  it('recargar el mismo mes no vacía la lista', async () => {
+    const carga = store.cargarGastos();
+    gastosDelMes('2026-11').flush(GASTOS);
+    await carga;
+
+    const recarga = store.cargarGastos();
+    expect(store.gastos()).toEqual(GASTOS);
+    gastosDelMes('2026-11').flush(GASTOS);
+    await recarga;
+  });
+
   it('al crear, envía POST y recarga la lista del mes seleccionado', async () => {
     const guardado = store.guardar({ fecha: '2026-11-03', importe: 5, categoriaId: 2, nota: null });
     const post = http.expectOne('/api/gastos');

@@ -11,6 +11,8 @@ export class GastosStore {
   private readonly api = inject(GastosApi);
   private readonly periodo = inject(MesSeleccionado);
   private pendientes = 0;
+  /** Mes al que pertenece la lista `gastos` actual. */
+  private mesCargado = this.periodo.mes();
 
   readonly gastos = signal<Gasto[]>([]);
   readonly categorias = signal<Categoria[]>([]);
@@ -35,6 +37,11 @@ export class GastosStore {
   /** Pide los gastos del mes actual; descarta la respuesta si el mes cambió mientras tanto. */
   private async pedirGastos(): Promise<void> {
     const mes = this.periodo.mes();
+    if (mes !== this.mesCargado) {
+      // Otro mes: no dejar a la vista (ni editables) los gastos del mes anterior.
+      this.gastos.set([]);
+      this.mesCargado = mes;
+    }
     const gastos = await firstValueFrom(this.api.listarGastos(mes));
     if (mes === this.periodo.mes()) {
       this.gastos.set(gastos);

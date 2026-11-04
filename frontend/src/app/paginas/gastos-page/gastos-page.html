@@ -31,7 +31,7 @@
 
   @if (store.cargando() && store.gastos().length === 0) {
     <p>Cargando…</p>
-  } @else {
+  } @else if (!(store.error() && store.gastos().length === 0)) {
     <app-gastos-tabla
       [gastos]="store.gastos()"
       [total]="store.total()"

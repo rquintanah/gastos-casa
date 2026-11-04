@@ -130,7 +130,7 @@ class GastoApiTest {
     }
 
     @ParameterizedTest(name = "mes={0}")
-    @ValueSource(strings = {"2026-13", "2026-00", "2026-1", "202611", "nov-2026", "2026-11-01", "abc", "-0001-01", "10000-01"})
+    @ValueSource(strings = {"2026-13", "2026-00", "2026-1", "202611", "nov-2026", "2026-11-01", "abc", "-0001-01", "10000-01", "+10000-01", "+999999999-12"})
     void rechazaMesInvalido(String mes) {
         assertThat(mvc.get().uri("/api/gastos").param("mes", mes))
                 .hasStatus(HttpStatus.BAD_REQUEST)
