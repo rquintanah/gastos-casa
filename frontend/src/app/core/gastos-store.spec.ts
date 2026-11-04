@@ -2,7 +2,9 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { GastosStore } from './gastos-store';
+import { MesSeleccionado } from './mes-seleccionado';
 import { Gasto } from './modelos';
+import { RELOJ } from './reloj';
 
 const COMIDA = { id: 2, nombre: 'Comida' };
 const GASTOS: Gasto[] = [
@@ -16,35 +18,68 @@ const tick = () => new Promise((resolve) => setTimeout(resolve));
 describe('GastosStore', () => {
   let store: GastosStore;
   let http: HttpTestingController;
+  let periodo: MesSeleccionado;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] });
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: RELOJ, useValue: () => new Date(2026, 10, 15) },
+      ],
+    });
     store = TestBed.inject(GastosStore);
+    periodo = TestBed.inject(MesSeleccionado);
     http = TestBed.inject(HttpTestingController);
   });
 
   afterEach(() => http.verify());
 
-  it('carga categorías y gastos y calcula el total sin errores de redondeo', async () => {
-    const carga = store.cargar();
+  const gastosDelMes = (mes: string) => http.expectOne((r) => r.url === '/api/gastos' && r.params.get('mes') === mes);
+
+  it('carga las categorías', async () => {
+    const carga = store.cargarCategorias();
     expect(store.cargando()).toBe(true);
     http.expectOne('/api/categorias').flush([COMIDA]);
-    http.expectOne('/api/gastos').flush(GASTOS);
     await carga;
 
     expect(store.cargando()).toBe(false);
     expect(store.categorias()).toEqual([COMIDA]);
+  });
+
+  it('carga los gastos del mes seleccionado y calcula el total sin errores de redondeo', async () => {
+    const carga = store.cargarGastos();
+    gastosDelMes('2026-11').flush(GASTOS);
+    await carga;
+
+    expect(store.cargando()).toBe(false);
     expect(store.gastos()).toEqual(GASTOS);
     expect(store.total()).toBe(0.3);
   });
 
-  it('al crear, envía POST y recarga la lista', async () => {
+  it('descarta la respuesta de un mes si el mes cambió mientras tanto', async () => {
+    const primera = store.cargarGastos();
+    const pendiente = gastosDelMes('2026-11');
+    periodo.ir('2026-10');
+    const segunda = store.cargarGastos();
+    const octubre = gastosDelMes('2026-10');
+
+    octubre.flush([GASTOS[1]]);
+    await segunda;
+    pendiente.flush(GASTOS); // llega tarde: no debe pisar octubre
+    await primera;
+
+    expect(store.gastos()).toEqual([GASTOS[1]]);
+    expect(store.cargando()).toBe(false);
+  });
+
+  it('al crear, envía POST y recarga la lista del mes seleccionado', async () => {
     const guardado = store.guardar({ fecha: '2026-11-03', importe: 5, categoriaId: 2, nota: null });
     const post = http.expectOne('/api/gastos');
     expect(post.request.method).toBe('POST');
     post.flush({ ...GASTOS[0], id: 3 });
     await tick();
-    http.expectOne({ method: 'GET', url: '/api/gastos' }).flush(GASTOS);
+    gastosDelMes('2026-11').flush(GASTOS);
 
     expect(await guardado).toBe(true);
     expect(store.gastos()).toEqual(GASTOS);
@@ -54,7 +89,7 @@ describe('GastosStore', () => {
     const guardado = store.guardar({ fecha: '2026-11-03', importe: 5, categoriaId: 2, nota: null }, 1);
     http.expectOne({ method: 'PUT', url: '/api/gastos/1' }).flush(GASTOS[1]);
     await tick();
-    http.expectOne('/api/gastos').flush(GASTOS);
+    gastosDelMes('2026-11').flush(GASTOS);
     expect(await guardado).toBe(true);
   });
 

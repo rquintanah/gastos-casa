@@ -49,4 +49,13 @@ describe('GastosTabla', () => {
     expect(html.textContent).toContain('Todavía no hay gastos');
     expect(html.querySelector('table')).toBeNull();
   });
+
+  it('muestra el mensaje indicado cuando no hay gastos', async () => {
+    const fixture = TestBed.createComponent(GastosTabla);
+    fixture.componentRef.setInput('gastos', []);
+    fixture.componentRef.setInput('total', 0);
+    fixture.componentRef.setInput('mensajeVacio', 'No hay gastos en octubre 2026');
+    await fixture.whenStable();
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('No hay gastos en octubre 2026');
+  });
 });

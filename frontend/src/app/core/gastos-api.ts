@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
+import { Mes } from './mes';
 import { Categoria, Gasto, GastoRequest } from './modelos';
 
 @Injectable({ providedIn: 'root' })
@@ -11,8 +12,9 @@ export class GastosApi {
     return this.http.get<Categoria[]>('/api/categorias');
   }
 
-  listarGastos(): Observable<Gasto[]> {
-    return this.http.get<Gasto[]>('/api/gastos');
+  /** Sin `mes`, todos los gastos; con `mes` (AAAA-MM), solo los de ese mes. */
+  listarGastos(mes?: Mes): Observable<Gasto[]> {
+    return this.http.get<Gasto[]>('/api/gastos', { params: mes ? { mes } : {} });
   }
 
   crear(datos: GastoRequest): Observable<Gasto> {

@@ -2,12 +2,15 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { GastosApi } from './gastos-api';
+import { MesSeleccionado } from './mes-seleccionado';
 import { Categoria, Gasto, GastoRequest, ProblemDetail } from './modelos';
 
 /** Estado de la pantalla de gastos, con signals. */
 @Injectable({ providedIn: 'root' })
 export class GastosStore {
   private readonly api = inject(GastosApi);
+  private readonly periodo = inject(MesSeleccionado);
+  private pendientes = 0;
 
   readonly gastos = signal<Gasto[]>([]);
   readonly categorias = signal<Categoria[]>([]);
@@ -18,15 +21,24 @@ export class GastosStore {
     this.gastos().reduce((suma, gasto) => suma + Math.round(gasto.importe * 100), 0) / 100,
   );
 
-  async cargar(): Promise<void> {
+  async cargarCategorias(): Promise<void> {
     await this.ejecutar(async () => {
-      const [categorias, gastos] = await Promise.all([
-        firstValueFrom(this.api.listarCategorias()),
-        firstValueFrom(this.api.listarGastos()),
-      ]);
-      this.categorias.set(categorias);
-      this.gastos.set(gastos);
+      this.categorias.set(await firstValueFrom(this.api.listarCategorias()));
     });
+  }
+
+  /** Carga los gastos del mes seleccionado. */
+  async cargarGastos(): Promise<void> {
+    await this.ejecutar(() => this.pedirGastos());
+  }
+
+  /** Pide los gastos del mes actual; descarta la respuesta si el mes cambió mientras tanto. */
+  private async pedirGastos(): Promise<void> {
+    const mes = this.periodo.mes();
+    const gastos = await firstValueFrom(this.api.listarGastos(mes));
+    if (mes === this.periodo.mes()) {
+      this.gastos.set(gastos);
+    }
   }
 
   /** Crea (sin id) o actualiza (con id). Devuelve true si se guardó. */
@@ -37,7 +49,7 @@ export class GastosStore {
       } else {
         await firstValueFrom(this.api.actualizar(id, datos));
       }
-      this.gastos.set(await firstValueFrom(this.api.listarGastos()));
+      await this.pedirGastos();
     });
   }
 
@@ -49,6 +61,7 @@ export class GastosStore {
   }
 
   private async ejecutar(accion: () => Promise<void>): Promise<boolean> {
+    this.pendientes++;
     this.cargando.set(true);
     this.error.set(null);
     try {
@@ -58,7 +71,8 @@ export class GastosStore {
       this.error.set(mensajeDeError(e));
       return false;
     } finally {
-      this.cargando.set(false);
+      this.pendientes--;
+      this.cargando.set(this.pendientes > 0);
     }
   }
 }
