@@ -18,6 +18,13 @@
   <header class="cabecera">
     <h2>Gastos</h2>
     <app-selector-mes [mes]="periodo.mes()" [maximo]="periodo.maximo" (cambiar)="periodo.ir($event)" />
+    <a
+      class="boton secundario exportar"
+      [href]="urlCsv()"
+      [attr.download]="archivoCsv()"
+      [attr.aria-label]="'Exportar CSV de ' + periodo.etiqueta()"
+      >Exportar CSV</a
+    >
   </header>
 
   @if (store.error(); as error) {

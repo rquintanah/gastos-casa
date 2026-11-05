@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   OnInit,
+  computed,
   effect,
   inject,
   signal,
@@ -10,6 +11,7 @@ import {
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { ImportePen } from '../../atomos/importe-pen/importe-pen';
+import { nombreArchivoCsv, urlExportarCsv } from '../../core/exportar-csv';
 import { GastosStore } from '../../core/gastos-store';
 import { MesSeleccionado } from '../../core/mes-seleccionado';
 import { Mes, mesDeFechaIso } from '../../core/mes';
@@ -38,6 +40,8 @@ export class GastosPage implements OnInit {
   protected readonly editando = signal<Gasto | null>(null);
   protected readonly porBorrar = signal<Gasto | null>(null);
   protected readonly guardadoEn = signal<Mes | null>(null);
+  protected readonly urlCsv = computed(() => urlExportarCsv(this.periodo.mes()));
+  protected readonly archivoCsv = computed(() => nombreArchivoCsv(this.periodo.mes()));
 
   constructor() {
     // Carga el mes actual al iniciar y recarga cada vez que cambia el mes.
