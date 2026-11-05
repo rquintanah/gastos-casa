@@ -380,4 +380,43 @@ describe('GastosPage', () => {
     http.expectNone((r) => r.url === '/api/gastos/resumen');
     expect(nombresBarras()).toEqual(['Comida']);
   });
+
+  // ---- Exportar CSV (issue #5) ----
+
+  const enlaceCsv = () => html.querySelector('a.exportar') as HTMLAnchorElement | null;
+
+  it('el enlace «Exportar CSV» apunta al mes mostrado y sugiere el nombre del archivo', async () => {
+    await cargarNoviembre();
+
+    const enlace = enlaceCsv();
+    expect(enlace?.textContent?.trim()).toBe('Exportar CSV');
+    expect(enlace?.getAttribute('href')).toBe('/api/gastos/export?mes=2026-11');
+    expect(enlace?.getAttribute('download')).toBe('gastos-2026-11.csv');
+    expect(enlace?.getAttribute('aria-label')).toBe('Exportar CSV de noviembre 2026');
+  });
+
+  it('al cambiar de mes el enlace pasa a exportar el mes nuevo', async () => {
+    await cargarNoviembre();
+
+    await pulsar('Mes anterior');
+    expect(enlaceCsv()?.getAttribute('href')).toBe('/api/gastos/export?mes=2026-10');
+    gastosDelMes('2026-10').flush(OCTUBRE);
+    resumenDe('2026-10');
+    await refrescar();
+
+    expect(enlaceCsv()?.getAttribute('href')).toBe('/api/gastos/export?mes=2026-10');
+    expect(enlaceCsv()?.getAttribute('download')).toBe('gastos-2026-10.csv');
+  });
+
+  it('un mes sin gastos sigue ofreciendo el enlace', async () => {
+    await cargarNoviembre();
+
+    await pulsar('Mes anterior');
+    gastosDelMes('2026-10').flush([]);
+    resumenDe('2026-10');
+    await refrescar();
+
+    expect(html.textContent).toContain('No hay gastos en octubre 2026');
+    expect(enlaceCsv()?.getAttribute('download')).toBe('gastos-2026-10.csv');
+  });
 });
