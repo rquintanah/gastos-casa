@@ -8,7 +8,7 @@
   />
 </section>
 
-<section class="panel">
+<section class="panel lista">
   <header class="cabecera">
     <h2>Gastos</h2>
     <app-selector-mes [mes]="periodo.mes()" [maximo]="periodo.maximo" (cambiar)="periodo.ir($event)" />
@@ -40,4 +40,13 @@
       (borrar)="porBorrar.set($event)"
     />
   }
+</section>
+
+<section class="panel resumen">
+  <app-resumen-mes
+    [etiquetaMes]="periodo.etiqueta()"
+    [barras]="resumen.barras()"
+    [cargando]="resumen.cargando()"
+    [error]="resumen.error()"
+  />
 </section>

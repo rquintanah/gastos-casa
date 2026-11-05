@@ -2,12 +2,33 @@
   display: grid;
   gap: 1.5rem;
   grid-template-columns: minmax(16rem, 22rem) 1fr;
+  grid-template-areas:
+    'formulario lista'
+    'resumen lista';
+  grid-template-rows: auto 1fr;
   align-items: start;
+}
+
+.formulario {
+  grid-area: formulario;
+}
+
+.lista {
+  grid-area: lista;
+}
+
+.resumen {
+  grid-area: resumen;
 }
 
 @media (max-width: 760px) {
   :host {
     grid-template-columns: 1fr;
+    grid-template-areas:
+      'formulario'
+      'resumen'
+      'lista';
+    grid-template-rows: auto;
   }
 }
 

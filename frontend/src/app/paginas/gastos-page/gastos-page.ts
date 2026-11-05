@@ -13,20 +13,24 @@ import { ImportePen } from '../../atomos/importe-pen/importe-pen';
 import { GastosStore } from '../../core/gastos-store';
 import { MesSeleccionado } from '../../core/mes-seleccionado';
 import { Gasto, GastoRequest } from '../../core/modelos';
+import { ResumenStore } from '../../core/resumen-store';
 import { GastoForm } from '../../moleculas/gasto-form/gasto-form';
 import { SelectorMes } from '../../moleculas/selector-mes/selector-mes';
 import { GastosTabla } from '../../organismos/gastos-tabla/gastos-tabla';
+import { ResumenMes } from '../../organismos/resumen-mes/resumen-mes';
 
 @Component({
   selector: 'app-gastos-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, GastoForm, GastosTabla, ImportePen, SelectorMes],
+  imports: [DatePipe, GastoForm, GastosTabla, ImportePen, ResumenMes, SelectorMes],
+  providers: [ResumenStore],
   templateUrl: './gastos-page.html',
   styleUrl: './gastos-page.css',
 })
 export class GastosPage implements OnInit {
   protected readonly store = inject(GastosStore);
   protected readonly periodo = inject(MesSeleccionado);
+  protected readonly resumen = inject(ResumenStore);
   private readonly formulario = viewChild.required(GastoForm);
 
   protected readonly editando = signal<Gasto | null>(null);

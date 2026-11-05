@@ -1,0 +1,24 @@
+<h2>Resumen de {{ etiquetaMes() }}</h2>
+
+@if (error(); as mensaje) {
+  <p class="aviso error" role="alert">{{ mensaje }}</p>
+}
+
+@if (barras().length > 0) {
+  <ol class="barras">
+    @for (barra of barras(); track barra.categoria.id) {
+      <li>
+        <app-barra-categoria
+          [nombre]="barra.categoria.nombre"
+          [total]="barra.total"
+          [porcentaje]="barra.porcentaje"
+          [cantidad]="barra.cantidad"
+        />
+      </li>
+    }
+  </ol>
+} @else if (cargando()) {
+  <p>Cargando…</p>
+} @else if (!error()) {
+  <p class="vacio">Sin gastos este mes</p>
+}
