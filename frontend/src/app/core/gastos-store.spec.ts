@@ -136,4 +136,39 @@ describe('GastosStore', () => {
     expect(await borrado).toBe(true);
     expect(store.gastos().map((g) => g.id)).toEqual([2]);
   });
+
+  it('cambios sube en 1 tras crear, editar y borrar con éxito', async () => {
+    expect(store.cambios()).toBe(0);
+
+    const creado = store.guardar({ fecha: '2026-11-03', importe: 5, categoriaId: 2, nota: null });
+    http.expectOne({ method: 'POST', url: '/api/gastos' }).flush({ ...GASTOS[0], id: 3 });
+    await tick();
+    gastosDelMes('2026-11').flush(GASTOS);
+    await creado;
+    expect(store.cambios()).toBe(1);
+
+    const editado = store.guardar({ fecha: '2026-11-03', importe: 5, categoriaId: 2, nota: null }, 1);
+    http.expectOne({ method: 'PUT', url: '/api/gastos/1' }).flush(GASTOS[1]);
+    await tick();
+    gastosDelMes('2026-11').flush(GASTOS);
+    await editado;
+    expect(store.cambios()).toBe(2);
+
+    const borrado = store.borrar(1);
+    http.expectOne({ method: 'DELETE', url: '/api/gastos/1' }).flush(null, { status: 204, statusText: 'No Content' });
+    await borrado;
+    expect(store.cambios()).toBe(3);
+  });
+
+  it('cambios no sube si la API falla', async () => {
+    const guardado = store.guardar({ fecha: '2026-11-03', importe: 0, categoriaId: 2, nota: null });
+    http.expectOne('/api/gastos').flush({ errores: { importe: 'x' } }, { status: 400, statusText: 'Bad Request' });
+    await guardado;
+
+    const borrado = store.borrar(1);
+    http.expectOne({ method: 'DELETE', url: '/api/gastos/1' }).flush(null, { status: 500, statusText: 'Error' });
+    await borrado;
+
+    expect(store.cambios()).toBe(0);
+  });
 });

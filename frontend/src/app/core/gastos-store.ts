@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { Injectable, Signal, computed, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { GastosApi } from './gastos-api';
 import { MesSeleccionado } from './mes-seleccionado';
@@ -13,6 +13,10 @@ export class GastosStore {
   private pendientes = 0;
   /** Mes al que pertenece la lista `gastos` actual. */
   private mesCargado = this.periodo.mes();
+
+  private readonly _cambios = signal(0);
+  /** Se incrementa tras cada alta, edición o borrado con éxito. Otros estados (resumen) la escuchan para refrescarse. */
+  readonly cambios: Signal<number> = this._cambios.asReadonly();
 
   readonly gastos = signal<Gasto[]>([]);
   readonly categorias = signal<Categoria[]>([]);
@@ -56,6 +60,7 @@ export class GastosStore {
       } else {
         await firstValueFrom(this.api.actualizar(id, datos));
       }
+      this._cambios.update((n) => n + 1);
       await this.pedirGastos();
     });
   }
@@ -63,6 +68,7 @@ export class GastosStore {
   async borrar(id: number): Promise<boolean> {
     return this.ejecutar(async () => {
       await firstValueFrom(this.api.borrar(id));
+      this._cambios.update((n) => n + 1);
       this.gastos.update((lista) => lista.filter((gasto) => gasto.id !== id));
     });
   }

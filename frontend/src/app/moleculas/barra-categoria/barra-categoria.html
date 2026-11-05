@@ -1,0 +1,10 @@
+<div class="fila">
+  <span class="nombre">{{ nombre() }} <span class="cantidad">({{ textoCantidad() }})</span></span>
+  <span class="valores">
+    <app-importe-pen [importe]="total()" />
+    <span class="porcentaje">{{ porcentaje() }} %</span>
+  </span>
+</div>
+<div class="pista" aria-hidden="true">
+  <div class="relleno" [class.minimo]="porcentaje() > 0" [style.width.%]="porcentaje()"></div>
+</div>
