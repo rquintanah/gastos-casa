@@ -81,9 +81,14 @@ class CsvGastosTest {
     }
 
     @Test
-    void neutralizaTabuladorYRetornoInicialYLuegoEntrecomillaElRetorno() {
-        assertThat(CsvGastos.campoTexto("\tx")).isEqualTo("'\tx");
+    void neutralizaTabuladorYRetornoInicialYLuegoEntrecomilla() {
+        assertThat(CsvGastos.campoTexto("\tx")).isEqualTo("\"'\tx\"");
         assertThat(CsvGastos.campoTexto("\rx")).isEqualTo("\"'\rx\"");
+    }
+
+    @Test
+    void tabuladorEnMedioEntrecomillaElCampo() {
+        assertThat(CsvGastos.campoTexto("a\t=cmd")).isEqualTo("\"a\t=cmd\"");
     }
 
     @Test

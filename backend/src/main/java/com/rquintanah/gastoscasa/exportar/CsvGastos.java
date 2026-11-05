@@ -28,7 +28,14 @@ final class CsvGastos {
         return csv.toString().getBytes(StandardCharsets.UTF_8);
     }
 
-    /** null → vacío; si empieza por un carácter de fórmula antepone ', y entrecomilla si hace falta. */
+    /**
+     * null → vacío; si empieza por un carácter de fórmula antepone ', y entrecomilla si hace falta.
+     *
+     * <p>Solo se mira el primer carácter: Excel, LibreOffice y Google Sheets no evalúan como fórmula
+     * una celda de CSV que empieza por espacio, salto de línea o un carácter invisible (p. ej. U+200B).
+     * El tabulador entrecomilla el campo para que tampoco parta la celda si alguien importa con tab
+     * como separador.
+     */
     static String campoTexto(String valor) {
         if (valor == null) {
             return "";
@@ -38,7 +45,7 @@ final class CsvGastos {
             texto = "'" + texto;
         }
         if (texto.indexOf(';') >= 0 || texto.indexOf(',') >= 0 || texto.indexOf('"') >= 0
-                || texto.indexOf('\r') >= 0 || texto.indexOf('\n') >= 0) {
+                || texto.indexOf('\t') >= 0 || texto.indexOf('\r') >= 0 || texto.indexOf('\n') >= 0) {
             return '"' + texto.replace("\"", "\"\"") + '"';
         }
         return texto;
