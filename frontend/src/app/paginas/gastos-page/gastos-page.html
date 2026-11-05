@@ -6,6 +6,12 @@
     (guardar)="guardar($event)"
     (cancelar)="editando.set(null)"
   />
+  <app-aviso-otro-mes
+    [mes]="guardadoEn()"
+    [maximo]="periodo.maximo"
+    (ir)="periodo.ir($event)"
+    (cerrar)="guardadoEn.set(null)"
+  />
 </section>
 
 <section class="panel lista">

@@ -1,0 +1,13 @@
+@if (mes(); as destino) {
+  <div class="aviso">
+    <span>Guardado en {{ etiquetaMes(destino) }}.</span>
+    @if (navegable()) {
+      <button type="button" class="secundario" (click)="ir.emit(destino)">
+        Ver {{ etiquetaMes(destino) }}
+      </button>
+    } @else {
+      <span>Recarga la página para ver ese mes.</span>
+    }
+    <button type="button" class="secundario cerrar" aria-label="Cerrar aviso" (click)="cerrar.emit()">×</button>
+  </div>
+}
