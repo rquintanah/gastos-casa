@@ -7,6 +7,7 @@ import java.time.YearMonth;
 /** Intervalo semiabierto [desde, hasta) de un mes; aprovecha ix_gasto_fecha. */
 public record RangoMes(LocalDate desde, LocalDate hasta) {
 
+    public static final String MENSAJE_OBLIGATORIO = "El mes es obligatorio";
     public static final String MENSAJE_FUERA_DE_RANGO = "El mes debe estar entre 0001-01 y 9999-12";
 
     /** @throws DatoInvalidoException con campo "mes" si el año no está en 1..9999 (evita DateTimeException → 500). */

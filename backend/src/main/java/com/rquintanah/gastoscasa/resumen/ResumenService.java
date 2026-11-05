@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class ResumenService {
 
-    public static final String MENSAJE_MES_OBLIGATORIO = "El mes es obligatorio";
+    public static final String MENSAJE_MES_OBLIGATORIO = RangoMes.MENSAJE_OBLIGATORIO;
 
     private final ResumenRepository resumenes;
 
