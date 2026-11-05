@@ -14,6 +14,9 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 - `GET /api/gastos?mes=…` responde `400` con `ProblemDetail` y `errores.mes` si el mes está mal formado o el año está fuera de `0001..9999`.
 - `GET /api/gastos/resumen?mes=AAAA-MM` devuelve el total y el número de gastos por categoría del mes, de mayor a menor importe. Un mes sin gastos responde `[]`. Sin `mes` o con `mes` mal formado responde `400` con `errores.mes`.
 - Bloque «Resumen de <mes>» en la pantalla de gastos: una barra por categoría con gastos, con su importe, su número de gastos y su porcentaje (los porcentajes suman 100 %). Se actualiza al cambiar de mes y al crear, editar o borrar un gasto.
+- `GET /api/gastos/export?mes=AAAA-MM` descarga los gastos del mes en CSV (`gastos-AAAA-MM.csv`): UTF-8 con BOM, separador `;`, fin de línea CRLF y columnas `fecha;categoria;importe;nota`. Sin `mes` o con `mes` mal formado responde `400` con `errores.mes`.
+- Botón «Exportar CSV» junto al selector de mes en la pantalla de gastos. Descarga el mes elegido, también cuando no tiene gastos (solo cabecera).
+- Las notas y categorías que empiezan por `=`, `+`, `-`, `@`, tabulador o retorno de carro llevan un `'` delante en el CSV para que Excel y Google Sheets no las traten como fórmulas. Las que contienen `;`, `,`, comillas o saltos de línea van entre comillas.
 
 ### Cambiado
 
