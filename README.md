@@ -32,7 +32,8 @@ cd frontend && npm run lint && npm run test -- --watch=false
 | Método | Ruta | Descripción |
 |---|---|---|
 | GET | `/api/categorias` | Categorías fijas |
-| GET | `/api/gastos` | Gastos, del más reciente al más antiguo |
+| GET | `/api/gastos` | Gastos, del más reciente al más antiguo (`?mes=AAAA-MM` para filtrar por mes) |
+| GET | `/api/gastos/resumen` | Total y número de gastos por categoría del mes (`?mes=AAAA-MM`, obligatorio) |
 | GET | `/api/gastos/{id}` | Un gasto |
 | POST | `/api/gastos` | Crear: `{fecha, importe, categoriaId, nota?}` |
 | PUT | `/api/gastos/{id}` | Editar |
